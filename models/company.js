@@ -44,49 +44,14 @@ class Company {
     return company;
   }
 
-  /** Find all companies.
+  /** Find all companies. Optional filter parameters using query strings
+   *  filter paramters include: name, minEmployees, maxEmployees
    *
    * Returns [{ handle, name, description, numEmployees, logoUrl }, ...]
    * */
-
-  static async findAll() {
-    const companiesRes = await db.query(
-          `SELECT handle,
-                  name,
-                  description,
-                  num_employees AS "numEmployees",
-                  logo_url AS "logoUrl"
-           FROM companies
-           ORDER BY name`);
-    return companiesRes.rows;
-  }
-
-  /** Find all filtered companies.
-   *
-   * Returns [{ handle, name, description, numEmployees, logoUrl }, ...]
-   * */
-
-  static async findAllFiltered(queryFilters) {
-    let idxCounter = 0;
-    const sqlStatements = []
-    const sqlValues = []
-    if (queryFilters.name) {
-      idxCounter++;
-      sqlStatements.push(`name = $${idxCounter}`);
-      sqlValues.push(`${queryFilters.name}`);
-    }
-    if (queryFilters.minEmployees) {
-      idxCounter++;
-      sqlStatements.push(`num_employees > $${idxCounter}`);
-      sqlValues.push(queryFilters.minEmployees);
-    }
-    if (queryFilters.maxEmployees) {
-      idxCounter++;
-      sqlStatements.push(`num_employees < $${idxCounter}`);
-      sqlValues.push(queryFilters.maxEmployees);
-    }
-
-    let sqlString = sqlStatements.length > 0 ? "WHERE " + sqlStatements.join(" AND ") : ""
+   
+  static async findAll(queryFilters = {}) {
+    const { sqlString, sqlValues } = handleFiltering(queryFilters);
 
     const companiesRes = await db.query(
           `SELECT handle,
@@ -181,6 +146,35 @@ class Company {
 
     if (!company) throw new NotFoundError(`No company: ${handle}`);
   }
+}
+
+// Construct a string to include with in the SQL query based on given query strings
+function handleFiltering(queryFilters) {
+  let idxCounter = 0;
+  const sqlStatements = []
+  const sqlValues = []
+  if (queryFilters.name) {
+    idxCounter++;
+    sqlStatements.push(`LOWER(name) LIKE LOWER($${idxCounter})`);
+    sqlValues.push(`%${queryFilters.name}%`);
+  }
+  if (queryFilters.minEmployees) {
+    idxCounter++;
+    sqlStatements.push(`num_employees >= $${idxCounter}`);
+    sqlValues.push(queryFilters.minEmployees);
+  }
+  if (queryFilters.maxEmployees) {
+    idxCounter++;
+    sqlStatements.push(`num_employees <= $${idxCounter}`);
+    sqlValues.push(queryFilters.maxEmployees);
+  }
+
+  if (queryFilters.minEmployees > queryFilters.maxEmployees) {
+    throw new BadRequestError(`Invalid parameters: minEmployees cannot be greater than maxEmployees`);
+  }
+
+  let sqlString = sqlStatements.length > 0 ? "WHERE " + sqlStatements.join(" AND ") : ""
+  return { sqlString, sqlValues }
 }
 
 
