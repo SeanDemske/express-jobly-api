@@ -219,6 +219,7 @@ describe("GET /users/:username", function () {
         lastName: "U1L",
         email: "user1@user.com",
         isAdmin: false,
+        jobs: []
       },
     });
   });
@@ -241,6 +242,7 @@ describe("GET /users/:username", function () {
         lastName: "U1L",
         email: "user1@user.com",
         isAdmin: false,
+        jobs: []
       },
     });
   });
@@ -393,5 +395,51 @@ describe("DELETE /users/:username", function () {
         .delete(`/users/nope`)
         .set("authorization", `Bearer ${uAdminToken}`);
     expect(resp.statusCode).toEqual(404);
+  });
+});
+
+/************************************** POST /users/:username/jobs/:id */
+
+describe("POST /users/:username/jobs/:id", function () {
+  test("works for logged in user", async function () {
+    let job = await db.query(`
+      SELECT id
+      FROM jobs`
+    );
+    const jobId = job.rows[0].id;
+    const resp = await request(app)
+        .post(`/users/u1/jobs/${jobId}`)
+        .set("authorization", `Bearer ${u1Token}`);
+    expect(resp.body).toEqual({ applied: `job id:${jobId}` });
+  });
+
+  test("fails for unauthorized user", async function () {
+    let job = await db.query(`
+      SELECT id
+      FROM jobs`
+    );
+    const jobId = job.rows[0].id;
+    const resp = await request(app)
+        .post(`/users/u1/jobs/${jobId}`)
+        .set("authorization", `Bearer ${u2Token}`);
+    expect(resp.statusCode).toBe(401);
+  });
+
+  test("works for admins", async function () {
+    let job = await db.query(`
+      SELECT id
+      FROM jobs`
+    );
+    const jobId = job.rows[0].id;
+    const resp = await request(app)
+        .post(`/users/u1/jobs/${jobId}`)
+        .set("authorization", `Bearer ${uAdminToken}`);
+    expect(resp.body).toEqual({ applied: `job id:${jobId}` });
+  });
+
+  test("unauth for anon", async function () {
+    const resp = await request(app)
+        .post(`/users/u1/jobs/123`);
+    expect(resp.statusCode).toEqual(401);
   });
 });

@@ -78,6 +78,13 @@ describe("findAll", function () {
             equity: "0", 
             company_handle: "c1",
             id: expect.any(Number)
+        },
+        {
+          title: "test job", 
+          salary: 60000, 
+          equity: "0", 
+          company_handle: "c1",
+          id: expect.any(Number)
         }
     ]);
   });
@@ -112,6 +119,13 @@ describe("findAll", function () {
         equity: "0", 
         company_handle: "c1",
         id: expect.any(Number)
+      },
+      {
+        title: "test job", 
+        salary: 60000, 
+        equity: "0", 
+        company_handle: "c1",
+        id: expect.any(Number)
       }
     ]);
   });
@@ -124,6 +138,13 @@ describe("findAll", function () {
     expect(jobs).toEqual([
       {
         title: "jest job", 
+        salary: 60000, 
+        equity: "0", 
+        company_handle: "c1",
+        id: expect.any(Number)
+      },
+      {
+        title: "test job", 
         salary: 60000, 
         equity: "0", 
         company_handle: "c1",
@@ -141,6 +162,13 @@ describe("findAll", function () {
     expect(jobs).toEqual([
       {
         title: "jest job", 
+        salary: 60000, 
+        equity: "0", 
+        company_handle: "c1",
+        id: expect.any(Number)
+      },
+      {
+        title: "test job", 
         salary: 60000, 
         equity: "0", 
         company_handle: "c1",

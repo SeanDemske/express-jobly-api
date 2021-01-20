@@ -115,6 +115,23 @@ class User {
     return result.rows;
   }
 
+  /** Find all jobs that specified user has applied to.
+   * 
+   *
+   * Returns [{jobId}, ...]
+   * 
+   * */
+  static async getJobs(username) {
+    const jobsRes = await db.query(
+            `SELECT job_id
+            FROM applications
+            WHERE username = $1`,
+            [username]
+           );
+    
+    return jobsRes.rows;
+  }
+
   /** Given a username, return data about user.
    *
    * Returns { username, first_name, last_name, is_admin, jobs }
@@ -191,7 +208,6 @@ class User {
   }
 
   /** Delete given user from database; returns undefined. */
-
   static async remove(username) {
     let result = await db.query(
           `DELETE
@@ -204,7 +220,16 @@ class User {
 
     if (!user) throw new NotFoundError(`No user: ${username}`);
   }
-}
 
+  // Add job application to database
+  static async applyForJob(username, jobId) {
+    await db.query(`
+      INSERT INTO applications (username, job_id)
+      VALUES ($1, $2)
+      RETURNING username, job_id`,
+      [username, jobId]
+    );
+  }
+}
 
 module.exports = User;

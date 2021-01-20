@@ -13,6 +13,7 @@ const {
   commonAfterEach,
   commonAfterAll,
 } = require("./_testCommon");
+const Job = require("./job");
 
 beforeAll(commonBeforeAll);
 beforeEach(commonBeforeEach);
@@ -164,18 +165,18 @@ describe("update", function () {
   };
 
   test("works", async function () {
-    let job = await User.update("u1", updateData);
-    expect(job).toEqual({
+    let user = await User.update("u1", updateData);
+    expect(user).toEqual({
       username: "u1",
       ...updateData,
     });
   });
 
   test("works: set password", async function () {
-    let job = await User.update("u1", {
+    let user = await User.update("u1", {
       password: "new",
     });
-    expect(job).toEqual({
+    expect(user).toEqual({
       username: "u1",
       firstName: "U1F",
       lastName: "U1L",
@@ -225,6 +226,37 @@ describe("remove", function () {
       fail();
     } catch (err) {
       expect(err instanceof NotFoundError).toBeTruthy();
+    }
+  });
+});
+
+/************************************** apply */
+
+describe("apply for job", function () {
+  test("works", async function () {
+    let job = await db.query(`
+      SELECT *
+      FROM jobs
+    `);
+    const jobId = job.rows[0].id;
+    await User.applyForJob("u1", jobId);
+    const res = await db.query(
+        "SELECT * FROM applications WHERE username='u1'");
+    expect(res.rows.length).toEqual(1);
+  });
+
+  test("duplicate throws error", async function () {
+    try {
+      let job = await db.query(`
+        SELECT *
+        FROM jobs
+      `);
+      const jobId = job.rows[0].id;
+      await User.applyForJob("u1", jobId);
+      await User.applyForJob("u1", jobId);
+      fail();
+    } catch (err) {
+      expect(err.code).toBe("23505");
     }
   });
 });

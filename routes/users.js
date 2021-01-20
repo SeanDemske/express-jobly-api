@@ -11,6 +11,7 @@ const User = require("../models/user");
 const { createToken } = require("../helpers/tokens");
 const userNewSchema = require("../schemas/userNew.json");
 const userUpdateSchema = require("../schemas/userUpdate.json");
+const Job = require("../models/job");
 
 const router = express.Router();
 
@@ -71,6 +72,8 @@ router.get("/", ensureLoggedIn, ensureAdmin, async function (req, res, next) {
 router.get("/:username", ensureLoggedIn, ensureAdminOrLoggedInUser, async function (req, res, next) {
   try {
     const user = await User.get(req.params.username);
+    const jobs = await User.getJobs(req.params.username);
+    user.jobs = jobs;
     return res.json({ user });
   } catch (err) {
     return next(err);
@@ -108,12 +111,26 @@ router.patch("/:username", ensureLoggedIn, ensureAdminOrLoggedInUser, async func
  *
  * Authorization required: login
  **/
-
 router.delete("/:username", ensureLoggedIn, ensureAdminOrLoggedInUser, async function (req, res, next) {
   try {
     await User.remove(req.params.username);
     return res.json({ deleted: req.params.username });
   } catch (err) {
+    return next(err);
+  }
+});
+
+
+/** POST /[username]/jobs/[id]  =>  { applied: id }
+ *
+ * Authorization required: admin or authorized user
+ **/
+router.post("/:username/jobs/:id", ensureLoggedIn, ensureAdminOrLoggedInUser, async function(req, res, next) {
+  try {
+    const {username, id} = req.params;
+    await User.applyForJob(username, id);
+    return res.json({ applied: `job id:${id}` });
+  } catch(err) {
     return next(err);
   }
 });
