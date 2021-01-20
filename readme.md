@@ -5,10 +5,10 @@ This is the Express backend for Jobly, version 2.
 -Install Node v12.17.0+  
 -CD into project directory  
 -Run 'npm install' to install dependencies   
--Create your production and test databases and seed with jobly-seed.sql
+-Create your production and test databases and seed with jobly-seed.sql  
 -Run the application with 'node server.js'  
 
 ## To Run Tests  
--Install jest
--Run 'jest -i' or 'jest -i --silent' for less details
+-Make sure jest is install jest  
+-Run 'jest -i' or 'jest -i --silent' for less details  
 
