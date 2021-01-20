@@ -62,7 +62,7 @@ class Company {
            FROM companies
             ${sqlString}
            ORDER BY name`,
-           sqlValues
+            sqlValues
            );
     return companiesRes.rows;
   }
@@ -84,7 +84,13 @@ class Company {
                   logo_url AS "logoUrl"
            FROM companies
            WHERE handle = $1`,
+           
         [handle]);
+
+        // SELECT name, json_agg(hobby) AS hobbies
+        // FROM users AS u
+        //   JOIN hobbies AS h ON (u.name = h.user_name)
+        // GROUP BY name;
 
     const company = companyRes.rows[0];
 
@@ -148,7 +154,7 @@ class Company {
   }
 }
 
-// Construct a string to include with in the SQL query based on given query strings
+// Construct a string to include in the SQL query based on given query strings
 function handleFiltering(queryFilters) {
   let idxCounter = 0;
   const sqlStatements = []

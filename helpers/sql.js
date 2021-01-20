@@ -4,7 +4,7 @@ const { BadRequestError } = require("../expressError");
 // returns an error if obj is invalid or empty
 // else, returns an object containing setCols - a string of SQL column assignments and values - an array of values that correspond to the SQL assignment statements
 
-function sqlForPartialUpdate(dataToUpdate, jsToSql) {
+function sqlForPartialUpdate(dataToUpdate, jsToSql = {}) {
   const keys = Object.keys(dataToUpdate);
   if (keys.length === 0) throw new BadRequestError("No data");
 
@@ -17,10 +17,6 @@ function sqlForPartialUpdate(dataToUpdate, jsToSql) {
     setCols: cols.join(", "),
     values: Object.values(dataToUpdate),
   };
-}
-
-function sqlForFilteredGet(dataToUpdate, jsToSql) {
-  
 }
 
 module.exports = { sqlForPartialUpdate };
